@@ -203,6 +203,9 @@ public class AzureRESTClient extends AzureConfigurable{
             ApiContext.getContext().getApiRequest().setAttribute(AzureConstants.AZURE_ACCESS_TOKEN, accessToken);
             ApiContext.getContext().getApiRequest().setAttribute(AzureConstants.AZURE_REFRESH_TOKEN, refreshToken);
 
+            response.close();
+            httpClient.close();
+
         } catch(ClientVisibleException ex) {
             throw ex;
         } catch(Exception ex) {
@@ -231,16 +234,38 @@ public class AzureRESTClient extends AzureConfigurable{
             noRefreshToken();
         }
         try{
+
+            CloseableHttpClient httpClient = HttpClients.custom().
+                    setHostnameVerifier(new AllowAllHostnameVerifier()).
+                    setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy()
+                    {
+    					@Override
+    					public boolean isTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
+    							throws java.security.cert.CertificateException {
+    						// TODO Auto-generated method stub
+    						return true;
+    					}
+                    }).build()).build();
+
+            HttpPost httpPost = new HttpPost(AzureConstants.AUTHORITY);
+            
+            httpPost.setHeader(AzureConstants.ACCEPT, AzureConstants.APPLICATION_FORM_URL_ENCODED);
+                        
+            List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+            nvps.add(new BasicNameValuePair("grant_type", "refresh_token"));
+            nvps.add(new BasicNameValuePair("refresh_token",  azureRefreshToken));
+
+            logger.error("refresh_token: " + azureRefreshToken);
+            
+            httpPost.setEntity(new UrlEncodedFormEntity(nvps));
             //post to the microsoft azure authority
-            HttpResponse response = Request.Post(AzureConstants.AUTHORITY)
-                    .addHeader(AzureConstants.ACCEPT, AzureConstants.APPLICATION_FORM_URL_ENCODED)
-                    .bodyString("grant_type=refresh_token&refresh_token="+azureRefreshToken, ContentType.APPLICATION_FORM_URLENCODED)
-                    .execute().returnResponse();
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+
             int statusCode = response.getStatusLine().getStatusCode();
             if(statusCode >= 300) {
                 noAzure(response);
             }
-            
+
             Map<String, Object> jsonData = jsonMapper.readValue(response.getEntity().getContent());
             
             String newAccessToken = ObjectUtils.toString(jsonData.get("access_token"));
@@ -249,7 +274,10 @@ public class AzureRESTClient extends AzureConfigurable{
             ApiContext.getContext().getApiRequest().setAttribute(AzureConstants.AZURE_REFRESH_TOKEN, newRefreshToken);
             logger.debug("Storing the new Azure access token to the Account");
             azureTokenUtil.refreshAccessToken();
-    
+            
+            response.close();
+            httpClient.close();
+
         } catch(ClientVisibleException ex) {
             logger.error("Failed to refreshAccessToken for Azure user.", ex);
             throw ex;
