@@ -340,19 +340,21 @@ public class AzureRESTClient extends AzureConfigurable{
     public HttpResponse getFromAzure(String azureAccessToken, String url) throws IOException {
 
 	    CloseableHttpResponse response = null;
+	    CloseableHttpClient httpClient = null;
+	    
             try {
 
-			CloseableHttpClient httpClient = HttpClients.custom().
-                    setHostnameVerifier(new AllowAllHostnameVerifier()).
-                    setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy()
-                    {
-    					@Override
-    					public boolean isTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
-    							throws java.security.cert.CertificateException {
-    						// TODO Auto-generated method stub
-    						return true;
-    					}
-                    }).build()).build();
+		httpClient = HttpClients.custom().
+                setHostnameVerifier(new AllowAllHostnameVerifier()).
+                setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy()
+                {
+    			@Override
+    			public boolean isTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
+    					throws java.security.cert.CertificateException {
+    				// TODO Auto-generated method stub
+    				return true;
+    			}
+                }).build()).build();
             
             HttpGet httpGet = new HttpGet(url);
             
