@@ -339,7 +339,10 @@ public class AzureRESTClient extends AzureConfigurable{
 
     public HttpResponse getFromAzure(String azureAccessToken, String url) throws IOException {
 
-         CloseableHttpClient httpClient = HttpClients.custom().
+
+            try {
+
+			CloseableHttpClient httpClient = HttpClients.custom().
                     setHostnameVerifier(new AllowAllHostnameVerifier()).
                     setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy()
                     {
@@ -357,12 +360,15 @@ public class AzureRESTClient extends AzureConfigurable{
             httpGet.addHeader(AzureConstants.ACCEPT, AzureConstants.APPLICATION_JSON);
             
             CloseableHttpResponse response = httpClient.execute(httpGet);
-
-        logger.debug("Response from Azure API: "+ response.getStatusLine());
-
-        httpClient.close();
-
-        return response;
+            logger.debug("Response from Azure API: "+ response.getStatusLine());
+	    
+            } catch (Exception ex) {
+                logger.error("Failed to getFromAzure.", ex);
+                throw new RuntimeException(ex);
+			} finally {
+		        httpClient.close();
+			}
+            return response;
     }    
 
     private void noAccessToken() {
