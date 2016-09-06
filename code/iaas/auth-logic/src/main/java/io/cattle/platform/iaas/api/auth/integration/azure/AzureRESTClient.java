@@ -368,7 +368,7 @@ public class AzureRESTClient extends AzureConfigurable{
                 logger.error("Failed to getFromAzure.", ex);
                 throw new RuntimeException(ex);
 	    } finally {
-	        httpClient.close();
+	        // httpClient.close();
 	    }
             return response;
     }    
