@@ -183,6 +183,11 @@ public class AzureRESTClient extends AzureConfigurable{
             nvps.add(new BasicNameValuePair("username", URLEncoder.encode(username, "UTF-8")));
             nvps.add(new BasicNameValuePair("password", URLEncoder.encode(split[1], "UTF-8")));
            
+           logger.debug("client_id: " + URLEncoder.encode(AzureConstants.AZURE_CLIENT_ID.get(), "UTF-8"));
+           logger.debug("username: " + URLEncoder.encode(username, "UTF-8"));
+           logger.debug("password: " + URLEncoder.encode(split[1], "UTF-8"));
+           logger.debug("url: " + AzureConstants.AUTHORITY);
+           
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
             CloseableHttpResponse response = httpClient.execute(httpPost);
             
