@@ -138,17 +138,33 @@ public class AzureRESTClient extends AzureConfigurable{
 
         String accessToken, refreshToken;
         try{   
-            StringBuilder body = new StringBuilder("scope=openid&grant_type=password&resource=https%3A%2F%2Fgraph.windows.net");
-            body.append("&client_id=");
-            body.append(URLEncoder.encode(AzureConstants.AZURE_CLIENT_ID.get(), "UTF-8"));
-            body.append("&username=");
-            body.append(URLEncoder.encode(username, "UTF-8"));
-            body.append("&password=");
-            body.append(URLEncoder.encode(split[1], "UTF-8")); 
+            CloseableHttpClient httpClient = HttpClients.custom().
+                    setHostnameVerifier(new AllowAllHostnameVerifier()).
+                    setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy()
+                    {
+    					@Override
+    					public boolean isTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
+    							throws java.security.cert.CertificateException {
+    						// TODO Auto-generated method stub
+    						return true;
+    					}
+                    }).build()).build();
+
+            HttpPost httpPost = new HttpPost(AzureConstants.AUTHORITY);
             
-            HttpResponse response = Request.Post(AzureConstants.AUTHORITY)
-                    .addHeader(AzureConstants.ACCEPT, AzureConstants.APPLICATION_FORM_URL_ENCODED)
-                    .bodyString(body.toString(), ContentType.APPLICATION_FORM_URLENCODED).execute().returnResponse();
+            httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                        
+            List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+            nvps.add(new BasicNameValuePair("scope", "openid"));
+            nvps.add(new BasicNameValuePair("grant_type", "password"));
+            nvps.add(new BasicNameValuePair("resource",  "https://graph.cloudapi.de/"));
+            nvps.add(new BasicNameValuePair("client_id", URLEncoder.encode(AzureConstants.AZURE_CLIENT_ID.get(), "UTF-8")));
+            nvps.add(new BasicNameValuePair("username", URLEncoder.encode(username, "UTF-8")));
+            nvps.add(new BasicNameValuePair("password", URLEncoder.encode(split[1], "UTF-8")));
+           
+            httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+            
             int statusCode = response.getStatusLine().getStatusCode();
             if(statusCode >= 300) {
                 noAzure(response);
