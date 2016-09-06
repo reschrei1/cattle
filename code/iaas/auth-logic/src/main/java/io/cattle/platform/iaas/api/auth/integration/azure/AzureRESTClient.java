@@ -339,10 +339,28 @@ public class AzureRESTClient extends AzureConfigurable{
 
     public HttpResponse getFromAzure(String azureAccessToken, String url) throws IOException {
 
-        HttpResponse response = Request.Get(url).addHeader(AzureConstants.AUTHORIZATION, "Bearer " +
-                "" + azureAccessToken).addHeader(AzureConstants.ACCEPT, AzureConstants.APPLICATION_JSON).execute().returnResponse();
-        
+         CloseableHttpClient httpClient = HttpClients.custom().
+                    setHostnameVerifier(new AllowAllHostnameVerifier()).
+                    setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy()
+                    {
+    					@Override
+    					public boolean isTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
+    							throws java.security.cert.CertificateException {
+    						// TODO Auto-generated method stub
+    						return true;
+    					}
+                    }).build()).build();
+            
+            HttpGet httpGet = new HttpGet(url);
+            
+            httpGet.addHeader(AzureConstants.AUTHORIZATION, "Bearer " + "" + azureAccessToken);
+            httpGet.addHeader(AzureConstants.ACCEPT, AzureConstants.APPLICATION_JSON);
+            
+            CloseableHttpResponse response = httpClient.execute(httpGet);
+
         logger.debug("Response from Azure API: "+ response.getStatusLine());
+
+        httpClient.close();
 
         return response;
     }    
