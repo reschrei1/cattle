@@ -23,10 +23,11 @@ public class AzureConstants {
     public static final String APPLICATION_FORM_URL_ENCODED = "application/x-www-form-urlencoded";
     public static final String AUTHORIZATION = "Authorization";
     
-
-    public static final String AUTHORITY = "https://login.windows.net/common/oauth2/token";
-    public static final String GRAPH_API_ENDPOINT = "https://graph.windows.net/";
-
+    // public static final String AUTHORITY = "https://login.windows.net/common/oauth2/token";
+    public static final String AUTHORITY = "https://login.microsoftonline.de/common/oauth2/token";
+    // public static final String GRAPH_API_ENDPOINT = "https://graph.windows.net/";
+    public static final String GRAPH_API_ENDPOINT = "https://graph.cloudapi.de/";
+    
     public static final String GRAPH_API_VERSION = "?api-version=1.6";
     
     public static final String CLIENT_ID = "client_id";
