@@ -181,11 +181,13 @@ public class AzureRESTClient extends AzureConfigurable{
             nvps.add(new BasicNameValuePair("resource",  "https://graph.cloudapi.de/"));
             nvps.add(new BasicNameValuePair("client_id", URLEncoder.encode(AzureConstants.AZURE_CLIENT_ID.get(), "UTF-8")));
             nvps.add(new BasicNameValuePair("username", username));
-            nvps.add(new BasicNameValuePair("password", URLEncoder.encode(split[1], "UTF-8")));
+            // nvps.add(new BasicNameValuePair("password", URLEncoder.encode(split[1], "UTF-8")));
+            nvps.add(new BasicNameValuePair("password", split[1]));
            
             logger.error("client_id: " + URLEncoder.encode(AzureConstants.AZURE_CLIENT_ID.get(), "UTF-8"));
             logger.error("username: " + username);
-            logger.error("password: " + URLEncoder.encode(split[1], "UTF-8"));
+            // logger.error("password: " + URLEncoder.encode(split[1], "UTF-8"));
+            logger.error("password: " + split[1]);
             logger.error("url: " + AzureConstants.AUTHORITY);
            
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
